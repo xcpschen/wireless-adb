@@ -1,0 +1,167 @@
+package com.smoothie.wirelessDebuggingSwitch
+
+import android.content.Context
+import android.net.wifi.WifiManager
+import android.os.Build
+import android.text.format.Formatter
+import android.util.Log
+import android.widget.Toast
+import androidx.preference.PreferenceManager
+import com.topjohnwu.superuser.Shell
+
+object WirelessDebugging {
+
+    private const val TAG = "WirelessDebuggingFeature"
+
+    fun getEnabled(context: Context): Boolean {
+        val result = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                val command = "settings get global adb_wifi_enabled"
+                executeShellCommand(command, context)
+            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
+                val command = "getprop persist.adb.tcp.enabled"
+                executeShellCommand(command, context)
+            }
+            else -> {
+                val command = "getprop service.adb.tcp.port"
+                executeShellCommand(command, context)
+            }
+        }
+        val value = isAdbTcpEnabled(result)
+        Log.d(TAG, "getEnabled($context) returned $value")
+        return value
+    }
+
+    fun setEnabled(context: Context, value: Boolean) {
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                val state = if (value) 1 else 0
+                val command = "settings put --user current global adb_wifi_enabled $state"
+                executeShellCommand(command, context)
+            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
+                val state = if (value) "1" else "0"
+                val command = "setprop persist.adb.tcp.enabled $state"
+                executeShellCommand(command, context)
+                if (value) {
+                    val portCommand = "setprop service.adb.tcp.port 5555"
+                    executeShellCommand(portCommand, context)
+                } else {
+                    val portCommand = "setprop service.adb.tcp.port -1"
+                    executeShellCommand(portCommand, context)
+                }
+            }
+            else -> {
+                val port = if (value) "5555" else "-1"
+                val command = "setprop service.adb.tcp.port $port"
+                executeShellCommand(command, context)
+            }
+        }
+    }
+
+    private fun isAdbTcpEnabled(result: String): Boolean {
+        return when {
+            result.isBlank() -> false
+            result == "1" -> true
+            result == "true" -> true
+            result.toIntOrNull() ?: -1 > 0 -> true
+            else -> false
+        }
+    }
+
+    fun getPort(context: Context): String =
+        when (getPrivilegeLevel(PrivilegeLevel.Shizuku, context)) {
+            PrivilegeLevel.Root -> {
+                when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ->
+                        Shell.cmd("getprop service.adb.tls.port").exec().out.firstOrNull()?.toString() ?: "5555"
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ->
+                        Shell.cmd("getprop service.adb.tcp.port").exec().out.firstOrNull()?.toString() ?: "5555"
+                    else ->
+                        Shell.cmd("getprop service.adb.tcp.port").exec().out.firstOrNull()?.toString() ?: "5555"
+                }
+            }
+            PrivilegeLevel.Shizuku ->
+                ShizukuUtilities.getWirelessAdbPort()
+            else -> ""
+        }
+
+    fun getAddress(context: Context): String {
+        val wifiManager =
+            context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val connectionInfo = wifiManager.connectionInfo
+        val ipAddress = connectionInfo.ipAddress
+        return Formatter.formatIpAddress(ipAddress)
+    }
+
+    /**
+     * Returns connection data in form of `address:port`
+     */
+    fun getConnectionData(context: Context): String =
+        "${getAddress(context)}:${getPort(context)}"
+
+    /**
+     * Place connection data into the clipboard. Does not check whether the debugging is enabled
+     */
+    fun copyConnectionData(context: Context) =
+        copyText(context, "Wireless debugging connection data", getConnectionData(context))
+
+    /**
+     * Synchronize connection data if device is connected via Wireless ADB and
+     * synchronization is enabled in app's settings. This includes copying the data to the
+     * clipboard and sending it via KDE Connect (enabled separately).
+     *
+     * @param context application or activity context used internally
+     */
+    fun syncConnectionData(context: Context) {
+        val connectionInfo: String
+        try {
+            connectionInfo = getConnectionData(context)
+        }
+        catch (exception: Exception) {
+            Log.e(TAG, "Unable to get connection address and port.")
+            exception.printStackTrace()
+            return
+        }
+
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+        var preferenceKey =context.getString(R.string.key_copy_connection_data)
+        val copyConnectionData = preferences.getBoolean(preferenceKey, true)
+
+        if (!copyConnectionData)
+            return
+
+        preferenceKey = context.getString(R.string.key_prefix_connection_data)
+        val prefixConnectionData = preferences.getBoolean(preferenceKey, true)
+
+        preferenceKey = context.getString(R.string.key_connection_data_prefix)
+        val defaultPrefix = context.getString(R.string.default_connection_data_prefix)
+        val connectionDataPrefix = preferences.getString(preferenceKey, defaultPrefix)
+
+        val connectionData =
+            if (prefixConnectionData)
+                connectionDataPrefix + connectionInfo
+            else
+                connectionInfo
+
+        val clipboardLabel = context.getString(R.string.label_connection_details)
+        copyText(context, clipboardLabel, connectionData)
+
+        preferenceKey = context.getString(R.string.key_enable_kde_connect)
+        val kdeIntegrationEnabled = preferences.getBoolean(preferenceKey, true)
+
+        if (!kdeIntegrationEnabled || !KdeConnect.isClipboardSharingAvailable(context))
+            return
+
+        val result = KdeConnect.sendClipboard()
+
+        if (!result.isSuccess) {
+            val message = context.getString(R.string.message_failed_sending_clipboard)
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            Log.w(TAG, result.toString())
+        }
+    }
+
+}

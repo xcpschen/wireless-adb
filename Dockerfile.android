@@ -1,0 +1,40 @@
+FROM gradle:8.7-jdk17
+
+USER root
+
+# 安装所有必要的库（包括 32 位和 64 位）
+RUN dpkg --add-architecture amd64 && \
+    apt-get update && apt-get install -y \
+    wget \
+    unzip \
+    openjdk-17-jdk \
+    libc6:amd64 \
+    libstdc++6:amd64 \
+    libgcc1:amd64 \
+    zlib1g:amd64 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 设置 Android SDK
+ENV ANDROID_HOME=/opt/android-sdk
+RUN mkdir -p $ANDROID_HOME/cmdline-tools/latest
+
+# 下载 Android 命令行工具
+RUN cd /tmp && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip && \
+    unzip -q commandlinetools-linux-11076708_latest.zip && \
+    mv cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/ && \
+    rm commandlinetools-linux-11076708_latest.zip
+
+ENV PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+
+# 接受许可证
+RUN yes | sdkmanager --licenses >/dev/null 2>&1
+
+# 安装必要的 SDK 组件
+RUN sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+USER gradle
+
+WORKDIR /home/gradle/project
+
+CMD ["gradle", "clean", "assembleDebug", "--no-daemon"]
