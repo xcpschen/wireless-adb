@@ -146,10 +146,11 @@ object WirelessDebugging {
 
         val result = KdeConnect.sendClipboard()
 
-        if (!result.isSuccess) {
+        // 如果返回空字符串，说明执行失败
+        if (result.isEmpty()) {
             val message = context.getString(R.string.message_failed_sending_clipboard)
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            Log.w(TAG, result.toString())
+            Log.w(TAG, "KDE Connect sendClipboard returned empty result")
         }
     }
 

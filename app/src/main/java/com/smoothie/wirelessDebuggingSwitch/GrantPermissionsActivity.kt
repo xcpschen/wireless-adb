@@ -199,7 +199,5 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
                 isNotificationPermissionGranted(context) && hasSufficientPrivileges()
         }
 
-        }
-
     }
 }
