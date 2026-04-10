@@ -27,8 +27,8 @@ jobs:
       - name: Decode Keystore
         if: ${{ env.KEYSTORE != '' }}
         run: |
-          # 使用 OpenSSL 代替 base64 命令（更可靠）
-          echo "${{ env.KEYSTORE }}" | openssl base64 -d -out wireless-adb.keystore
+          # GitHub Actions Linux 环境使用 base64 -d 解码
+          echo "${{ env.KEYSTORE }}" | base64 -d > wireless-adb.keystore
         env:
           KEYSTORE: ${{ secrets.KEYSTORE }}
         shell: bash
