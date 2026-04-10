@@ -15,7 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.android.material.button.MaterialButton
 
 val centeredAlertDialogStyle =
-    com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
+    com.google.android.material.R.style.ThemeOverlay_MaterialComponents_MaterialAlertDialog
 
 /**
  * Get the highest privilege level available

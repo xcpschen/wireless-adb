@@ -31,7 +31,7 @@
             android:id="@+id/text_view_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.TitleSmall"
             android:text="@string/qs_tile_label_missing_privileges"
             android:gravity="center"
             android:layout_marginTop="4dp"/>
@@ -40,7 +40,7 @@
             android:id="@+id/text_view_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.BodySmall"
             android:text="@string/qs_tile_subtitle_missing_privileges"
             android:gravity="center"
             android:layout_marginTop="4dp"/>

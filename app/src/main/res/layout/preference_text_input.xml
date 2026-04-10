@@ -61,7 +61,7 @@
         android:id="@android:id/summary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.BodyMedium"
         android:textColor="?android:attr/textColorSecondary"
         tools:text="Placeholder"
         android:paddingTop="5dp"

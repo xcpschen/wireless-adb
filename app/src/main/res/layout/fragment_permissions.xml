@@ -50,7 +50,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/grant_notifications"
-            style="@style/TextAppearance.Material3.TitleLarge"
+            style="@style/TextAppearance.MaterialComponents.TitleLarge"
             android:text="@string/title_notifications" />
 
         <Button
@@ -83,7 +83,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/grant_root_access"
-            style="@style/TextAppearance.Material3.TitleLarge"
+            style="@style/TextAppearance.MaterialComponents.TitleLarge"
             android:text="@string/title_root_access" />
 
         <Button
@@ -117,7 +117,7 @@
             app:layout_constraintEnd_toStartOf="@id/refresh_shizuku_status"
             app:layout_constraintBottom_toBottomOf="parent"
             android:gravity="center_vertical"
-            style="@style/TextAppearance.Material3.TitleLarge"
+            style="@style/TextAppearance.MaterialComponents.TitleLarge"
             android:text="@string/title_shizuku" />
 
         <Button
