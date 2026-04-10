@@ -12,6 +12,6 @@
     android:paddingHorizontal="20dp"
     android:background="@android:color/transparent"
     android:paddingVertical="@dimen/preference_padding"
-    android:textAppearance="@style/TextAppearance.MaterialComponents.BodyMedium"
+    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
     android:textColor="?android:attr/textColorSecondary"
     tools:text="Some long description"/>

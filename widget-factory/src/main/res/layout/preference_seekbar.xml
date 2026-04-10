@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.TitleMedium"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             android:ellipsize="marquee" />
 
         <TextView
@@ -51,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="5dp"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.BodyMedium"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textColor="?android:attr/textColorSecondary"
             tools:text="Placeholder description of an example widget!"/>
 

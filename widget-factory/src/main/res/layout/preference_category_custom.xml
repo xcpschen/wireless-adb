@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     tools:text="Placeholder"
     android:textColor="?attr/colorPrimaryVariant"
-    android:textAppearance="@style/TextAppearance.MaterialComponents.TitleMedium"
+    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
     android:paddingVertical="@dimen/preference_padding"
     android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
