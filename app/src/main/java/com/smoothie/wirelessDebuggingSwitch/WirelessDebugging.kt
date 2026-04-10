@@ -7,7 +7,6 @@ import android.text.format.Formatter
 import android.util.Log
 import android.widget.Toast
 import androidx.preference.PreferenceManager
-import com.topjohnwu.superuser.Shell
 
 object WirelessDebugging {
 
@@ -72,16 +71,6 @@ object WirelessDebugging {
 
     fun getPort(context: Context): String =
         when (getPrivilegeLevel(PrivilegeLevel.Shizuku, context)) {
-            PrivilegeLevel.Root -> {
-                when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ->
-                        Shell.cmd("getprop service.adb.tls.port").exec().out.firstOrNull()?.toString() ?: "5555"
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ->
-                        Shell.cmd("getprop service.adb.tcp.port").exec().out.firstOrNull()?.toString() ?: "5555"
-                    else ->
-                        Shell.cmd("getprop service.adb.tcp.port").exec().out.firstOrNull()?.toString() ?: "5555"
-                }
-            }
             PrivilegeLevel.Shizuku ->
                 ShizukuUtilities.getWirelessAdbPort()
             else -> ""

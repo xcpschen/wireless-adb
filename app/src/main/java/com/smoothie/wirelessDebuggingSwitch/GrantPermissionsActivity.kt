@@ -21,7 +21,6 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.smoothie.widgetFactory.CollapsingToolbarActivity
-import com.topjohnwu.superuser.Shell
 
 class GrantPermissionsActivity : CollapsingToolbarActivity(
     R.string.title_additional_setup,
@@ -96,10 +95,8 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
         }
 
         private val requestRootAccess = OnClickListener {
-            Log.d("requestRootAccess", "Requesting the state")
-            // This line will prompt the user to provide root access if it is unavailable
-            val state = Shell.isAppGrantedRoot()
-            Log.d("requestRootAccess", "Received state: $state")
+            Log.d("requestRootAccess", "Root access check removed - using Shizuku only")
+            // Root 权限检查已移除，现在只使用 Shizuku
             updatePrivilegeLevelCards()
         }
 
@@ -125,17 +122,15 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
             continueButton = view.findViewById(R.id.button_continue)
 
             notificationsButton.setOnClickListener(requestNotificationsPermission)
-            rootAccessButton.setOnClickListener(requestRootAccess)
+            rootAccessButton.isEnabled = false
+            rootAccessButton.text = getString(R.string.label_not_needed)
             shizukuButton.setOnClickListener(requestShizukuPermission)
             refreshShizukuStatusButton.setOnClickListener { updatePrivilegeLevelCards() }
-            rootAccessButton.setOnClickListener { restartAppForRootAccessRefresh() }
 
             continueButton.fixTextAlignment()
             continueButton.setOnClickListener {
-                if (Shell.isAppGrantedRoot() == true)
-                    showMagiskNotificationsReminder(requireContext())
-                else
-                    this@GrantPermissionsFragment.requireActivity().finish()
+                // 不再检查 root 权限，只使用 Shizuku
+                this@GrantPermissionsFragment.requireActivity().finish()
             }
 
             updateAllCards()
@@ -174,17 +169,10 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
         }
 
         private fun updatePrivilegeLevelCards() {
-            if (Shell.isAppGrantedRoot() == true) {
+            // 只检查 Shizuku 权限，不再检查 root
+            if (ShizukuUtilities.hasShizukuPermission()) {
                 rootAccessButton.isEnabled = false
-                rootAccessButton.text = getString(R.string.label_granted)
-                shizukuButton.isEnabled = false
-                shizukuButton.text = getString(R.string.label_not_needed)
-                updateContinueButton()
-                return
-            }
-            else if (ShizukuUtilities.hasShizukuPermission()) {
-                rootAccessButton.isEnabled = true
-                rootAccessButton.text = getString(R.string.label_grant_permission)
+                rootAccessButton.text = getString(R.string.label_not_needed)
                 shizukuButton.isEnabled = false
                 shizukuButton.text = getString(R.string.label_granted)
             }
@@ -200,8 +188,8 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
                 }
             }
 
-            rootAccessButton.isEnabled = true
-            rootAccessButton.text = getString(R.string.label_restart)
+            rootAccessButton.isEnabled = false
+            rootAccessButton.text = getString(R.string.label_not_needed)
 
             updateContinueButton()
         }
@@ -211,29 +199,6 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
                 isNotificationPermissionGranted(context) && hasSufficientPrivileges()
         }
 
-        /**
-         * Sets a shared preference and kills the app process because root access management
-         * solutions like Magisk do not update the state of Shell.isAppGrantedRoot()
-         * without a full restart
-         */
-        @SuppressLint("WrongConstant")
-        private fun restartAppForRootAccessRefresh() {
-            val manager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val time = System.currentTimeMillis() + 100
-            val intent = requireActivity().intent
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-            val pendingIntent = PendingIntent.getActivity(
-                requireActivity().baseContext,
-                0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE
-            )
-            manager.set(AlarmManager.RTC, time, pendingIntent)
-
-            Process.killProcess(Process.myPid())
         }
 
     }

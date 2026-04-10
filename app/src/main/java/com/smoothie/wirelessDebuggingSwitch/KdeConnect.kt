@@ -2,7 +2,6 @@ package com.smoothie.wirelessDebuggingSwitch
 
 import android.content.Context
 import android.util.Log
-import com.topjohnwu.superuser.Shell
 
 object KdeConnect {
 
@@ -17,21 +16,21 @@ object KdeConnect {
     }
 
     fun isClipboardSharingAvailable(context: Context): Boolean =
-        isInstalled(context) && hasSufficientPrivileges(PrivilegeLevel.Root)
+        isInstalled(context) && hasSufficientPrivileges(PrivilegeLevel.Shizuku)
 
     /**
      * Synchronizes the clipboard data using KDE Connect.
-     * Requires root access. Starts
+     * Requires Shizuku access. Starts
      * [the following activity](https://invent.kde.org/network/kdeconnect-android/-/blob/aca039433c455b44b621dda077b940f26a732f25/src/org/kde/kdeconnect/Plugins/ClibpoardPlugin/ClipboardFloatingActivity.java)
      * of KDE Connect.
      */
-    fun sendClipboard(): Shell.Result {
+    fun sendClipboard(): String {
         val command =
             "am start " +
-            "-n $PACKAGE_NAME/$CLIPBOARD_ACTIVITY_NAME " +
+            " -n $PACKAGE_NAME/$CLIPBOARD_ACTIVITY_NAME " +
             "--ez SHOW_TOAST 0"
 
-        return Shell.cmd(command).exec()
+        return executeShellCommand(command)
     }
 
 }

@@ -13,7 +13,6 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.material.button.MaterialButton
-import com.topjohnwu.superuser.Shell
 
 val centeredAlertDialogStyle =
     com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
@@ -31,21 +30,16 @@ fun getPrivilegeLevel(
     requiredPrivilegeLevel: PrivilegeLevel = PrivilegeLevel.Shizuku,
     context: Context? = null,
 ) : PrivilegeLevel {
-    val privilegeLevel: PrivilegeLevel =
-        if (Shell.isAppGrantedRoot() == true)
-            PrivilegeLevel.Root
-        else if (ShizukuUtilities.hasShizukuPermission())
-            PrivilegeLevel.Shizuku
-        else
-            PrivilegeLevel.User
-
-    if (privilegeLevel.ordinal < requiredPrivilegeLevel.ordinal) {
-        Log.e("Utilities.getPrivilegeLevel", "Required privilege level too high!")
-        if (context != null)
-            sendMissingPrivilegesNotification(context)
+    // 优先使用 Shizuku
+    if (ShizukuUtilities.hasShizukuPermission()) {
+        return PrivilegeLevel.Shizuku
     }
-
-    return privilegeLevel
+    
+    // 如果没有 Shizuku，降级为用户模式
+    if (context != null)
+        sendMissingPrivilegesNotification(context)
+    
+    return PrivilegeLevel.User
 }
 
 /**
@@ -65,11 +59,7 @@ fun hasSufficientPrivileges(
     ).ordinal >= requiredPrivilegeLevel.ordinal
 
 /**
- * Execute a shell command. This method will choose between Shizuku and root execution.
- * If neither are possible the result will be null.
- *
- * Inspired by a similar implementation in
- * [Better Internet Tiles](https://github.com/CasperVerswijvelt/Better-Internet-Tiles).
+ * Execute a shell command using Shizuku.
  *
  * @param command a command to execute
  * @param context if a context is provided, the user will be notified about missing privileges
@@ -87,19 +77,14 @@ fun executeShellCommand(
 
     val privilegeLevel = getPrivilegeLevel(requiredPrivilegeLevel, context)
 
-    if (privilegeLevel == PrivilegeLevel.Root) {
-        val result = Shell.cmd(command).exec().out.joinToString()
-        Log.d(tag, "Executed with Shell. Result: '$result'")
-        return result
-    }
-    else if (privilegeLevel == PrivilegeLevel.Shizuku) {
+    if (privilegeLevel == PrivilegeLevel.Shizuku) {
         val result = ShizukuUtilities.executeCommand(command)
         Log.d(tag, "Executed with ShizukuUtilities. Result: '$result'")
         return result
     }
 
     val message =
-        "Error executing a shell command! Neither Shizuku or root access are present."
+        "Error executing a shell command! Shizuku access not available."
     Log.d("Utilities.executeShellCommand", message)
     return ""
 }
