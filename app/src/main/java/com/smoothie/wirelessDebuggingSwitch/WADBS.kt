@@ -7,7 +7,6 @@ import com.smoothie.widgetFactory.ConfigurableWidget
 import com.smoothie.widgetFactory.WidgetFactoryApplication
 import com.smoothie.wirelessDebuggingSwitch.widget.BasicWidget
 import com.smoothie.wirelessDebuggingSwitch.widget.InformationWidget
-import com.topjohnwu.superuser.Shell
 
 class WADBS : WidgetFactoryApplication() {
 
@@ -16,15 +15,6 @@ class WADBS : WidgetFactoryApplication() {
         const val PRIVILEGE_NOTIFICATION_CHANNEL_ID =
             "com.smoothie.wadbs.missing_privileges_channel"
         const val PRIVILEGE_NOTIFICATION_ID = 0
-
-        init {
-            Shell.enableVerboseLogging = BuildConfig.DEBUG
-
-            val builder = Shell.Builder.create()
-                .setFlags(Shell.FLAG_REDIRECT_STDERR)
-                .setTimeout(10)
-            Shell.setDefaultBuilder(builder)
-        }
 
     }
 
