@@ -23,6 +23,26 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
       
+      # 解码密钥库（如果 Secrets 已配置）
+      - name: Decode Keystore
+        if: ${{ env.KEYSTORE != '' }}
+        run: |
+          echo "${{ secrets.KEYSTORE }}" | base64 --decode > wireless-adb.keystore
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+      
+      # 创建 keystore.properties（如果 Secrets 已配置）
+      - name: Create Keystore Properties
+        if: ${{ env.KEYSTORE_PASSWORD != '' }}
+        run: |
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > keystore.properties
+          echo "keyPassword=${{ secrets.KEYSTORE_PASSWORD }}" >> keystore.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> keystore.properties
+          echo "storeFile=../wireless-adb.keystore" >> keystore.properties
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      
       - name: Build Debug APK
         run: ./gradlew assembleDebug
       
