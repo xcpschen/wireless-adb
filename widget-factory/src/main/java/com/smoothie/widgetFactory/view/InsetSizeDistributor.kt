@@ -4,8 +4,9 @@ import android.content.Context
 import android.graphics.Insets
 import android.util.AttributeSet
 import android.view.View
-import android.view.WindowInsets
 import android.widget.FrameLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 abstract class InsetSizeDistributor : FrameLayout {
 
@@ -26,9 +27,9 @@ abstract class InsetSizeDistributor : FrameLayout {
     }
 
     private fun applyLayoutParameters() {
-        setOnApplyWindowInsetsListener { view, insets ->
-            val mask = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-            val actualInsets = insets.getInsetsIgnoringVisibility(mask)
+        ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
+            val mask = WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            val actualInsets = insets.getInsets(mask)
             applyInsets(view, actualInsets)
             insets
         }
