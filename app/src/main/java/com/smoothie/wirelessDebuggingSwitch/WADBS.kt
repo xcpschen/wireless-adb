@@ -38,8 +38,9 @@ class WADBS : WidgetFactoryApplication() {
 
         notificationManager =  NotificationManagerCompat.from(this)
         createMissingPrivilegeNotificationsChannel()
-        if (hasSufficientPrivileges())
-            notificationManager.cancel(PRIVILEGE_NOTIFICATION_ID)
+        // 不在启动时检查权限，而是在需要时再检查
+        // if (hasSufficientPrivileges())
+        //     notificationManager.cancel(PRIVILEGE_NOTIFICATION_ID)
     }
 
     private fun createMissingPrivilegeNotificationsChannel() {
