@@ -36,8 +36,6 @@ class WADBS : WidgetFactoryApplication() {
         ConfigurableWidget.addWidget(BasicWidget::class.java.name)
         ConfigurableWidget.addWidget(InformationWidget::class.java.name)
 
-        Shell.getShell()
-
         notificationManager =  NotificationManagerCompat.from(this)
         createMissingPrivilegeNotificationsChannel()
         if (hasSufficientPrivileges())
