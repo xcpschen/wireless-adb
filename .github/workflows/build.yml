@@ -25,11 +25,11 @@ jobs:
       
       # 解码密钥库（如果 Secrets 已配置）
       - name: Decode Keystore
-        if: ${{ env.KEYSTORE != '' }}
+        if: ${{ secrets.KEYSTORE != '' && secrets.KEYSTORE != null }}
         run: |
-          echo "${{ secrets.KEYSTORE }}" | base64 --decode > wireless-adb.keystore
-        env:
-          KEYSTORE: ${{ secrets.KEYSTORE }}
+          # 使用 OpenSSL 代替 base64 命令（更可靠）
+          echo "${{ secrets.KEYSTORE }}" | openssl base64 -d -out wireless-adb.keystore
+        shell: bash
       
       # 创建 keystore.properties（如果 Secrets 已配置）
       - name: Create Keystore Properties
